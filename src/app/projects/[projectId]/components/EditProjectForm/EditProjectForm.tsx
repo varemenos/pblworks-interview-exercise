@@ -1,14 +1,11 @@
 'use client'
 
 import { updateProject } from '@/app/projects/[projectId]/actions/update-project'
+import { isSuccess } from '@/lib/result'
 import { LoadingButton } from '@mui/lab'
 import {
-  FormControl,
   Grid,
-  Input,
-  InputLabel,
   Paper,
-  Stack,
   TextField,
   Typography,
 } from '@mui/material'
@@ -20,16 +17,29 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
   const [subhead, setSubhead] = useState(project.subhead)
   const [description, setDescription] = useState(project.description)
   const [isLoading, setIsLoading] = useState(false)
+  const [serverVersion, setServerVersion] = useState(project.version)
 
   const onSave = async () => {
     setIsLoading(true)
     try {
-      await updateProject({
-        id: project.id,
-        title,
-        subhead,
-        description,
-      })
+      const result = await updateProject(
+        project.id,
+        {
+          title,
+          subhead,
+          description,
+        },
+        serverVersion
+      )
+
+      if (isSuccess(result)) {
+        setServerVersion(result.data.version)
+      } else {
+        console.error('Error while trying to update project', {
+          project: { id: project.id, title, description, subhead },
+          error: result.error,
+        })
+      }
     } catch (error: unknown) {
       console.error('Error while trying to update project', {
         project: { id: project.id, title, description, subhead },
