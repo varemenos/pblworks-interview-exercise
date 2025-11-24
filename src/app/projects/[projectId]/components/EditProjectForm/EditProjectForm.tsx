@@ -2,7 +2,6 @@
 
 import { updateProject, type UpdateProjectResult } from '@/app/projects/[projectId]/actions/update-project'
 import { isSuccess, type ExtractFailure } from '@/lib/result'
-import { LoadingButton } from '@mui/lab'
 import {
   Grid,
   Paper,
@@ -10,7 +9,8 @@ import {
   Typography,
 } from '@mui/material'
 import { Project } from '@prisma/client'
-import { useReducer } from 'react'
+import { useReducer, useEffect, useRef, useCallback } from 'react'
+import { useDebouncer } from '@tanstack/react-pacer'
 
 export const EditProjectForm = ({ project }: { project: Project }) => {
   const [state, dispatch] = useReducer(reducer, {
@@ -21,20 +21,44 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
     lastSavedAt: null,
   })
 
-  const onSave = async () => {
+  // Track the latest state for the debounced callback
+  const stateRef = useRef(state)
+  stateRef.current = state
+
+  // Memoize runSave to prevent recreating the debouncer on every render
+  const runSave = useCallback(async () => {
+    const currentState = stateRef.current
+
+    // Check conditions before saving
+    if (
+      !currentState.dirty ||
+      (currentState.status !== 'idle' && currentState.status !== 'error')
+    ) {
+      return
+    }
+
+    // Don't save if there's a conflict error
+    if (
+      currentState.status === 'error' &&
+      currentState.error?.kind === 'conflict'
+    ) {
+      return
+    }
+
     dispatch({ type: 'SAVE_STARTED' })
 
     const data = {
-      title: state.project.title,
-      subhead: state.project.subhead,
-      description: state.project.description,
+      title: currentState.project.title,
+      subhead: currentState.project.subhead,
+      description: currentState.project.description,
     }
 
+    // try/catch to handle network errors
     try {
       const result = await updateProject(
-        state.project.id,
+        currentState.project.id,
         data,
-        state.serverVersion,
+        currentState.serverVersion,
       )
 
       if (isSuccess(result)) {
@@ -60,7 +84,33 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
         },
       })
     }
-  }
+  }, [])
+
+  // Debounced save function with 1500ms delay
+  const saveDebouncer = useDebouncer(runSave, { wait: 1500 })
+
+  // Schedule autosave when conditions are met
+  // This also handles rescheduling after SAVE_SUCCEEDED if there are still unsaved changes
+  useEffect(() => {
+    // Only schedule if dirty and in a saveable state
+    if (
+      state.dirty &&
+      (state.status === 'idle' || state.status === 'error')
+    ) {
+      // Don't schedule if there's a conflict error (conflicts require user resolution)
+      if (state.status === 'error' && state.error?.kind === 'conflict') return
+
+      saveDebouncer.maybeExecute()
+    }
+
+    return () => {
+      // cancel pending saves when component unmounts or conditions change
+      saveDebouncer.cancel()
+    }
+
+    // This effect handles both initial scheduling and rescheduling after SAVE_SUCCEEDED
+    // (when state.dirty becomes true again and status is 'idle')
+  }, [state.dirty, state.status, state.error?.kind, saveDebouncer])
 
   return (
     <Paper sx={{ padding: 2 }}>
@@ -114,9 +164,6 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
           />
         </Grid>
       </Grid>
-      <LoadingButton loading={state.status === 'saving'} onClick={onSave} variant="contained">
-        Update Project
-      </LoadingButton>
     </Paper>
   )
 }
@@ -146,15 +193,10 @@ export type Action =
         value: string
       }
     }
-  | {
-      type: 'SAVE_STARTED'
-    }
+  | { type: 'SAVE_STARTED' }
   | {
       type: 'SAVE_SUCCEEDED'
-      payload: {
-        project: Project
-        version: number
-      }
+      payload: { project: Project; version: number }
     }
   | {
       type: 'SAVE_ERRORED'
