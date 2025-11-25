@@ -11,6 +11,7 @@ import {
 import { Project } from '@prisma/client'
 import { useReducer, useEffect, useRef, useCallback, type Dispatch } from 'react'
 import { useDebouncer } from '@tanstack/react-pacer'
+import { useNavigationGuard } from '@/lib/hooks/useNavigationGuard'
 import { StatusIcon } from './StatusIcon'
 import { ConflictBanner } from './ConflictBanner'
 
@@ -65,6 +66,9 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
     }
     return () => { saveDebouncer.cancel() }
   }, [state.status, state.error?.kind, saveDebouncer])
+
+  // Navigation guard: warn user before closing the browser tab (if they have unsaved changes)
+  useNavigationGuard(state.dirty === true || state.status === 'saving')
 
   // When the user makes a change to a field, we need to update the state and trigger a save
   // We use the debouncer to ensure that multiple rapid changes are debounced together into a single save
