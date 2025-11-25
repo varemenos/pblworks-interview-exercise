@@ -5,24 +5,31 @@
  * - Multiple rapid field changes are debounced together into a single save
  * - UI updates immediately as the user types, before any save completes
  */
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { EditProjectForm } from './EditProjectForm'
 import { updateProject } from '../../actions/update-project'
 import { Project } from '@prisma/client'
 import { success } from '@/lib/result'
-import { act } from 'react'
 
 jest.mock('../../actions/update-project')
 
 // Mock useDebouncer to simulate debounce behavior with fake timers
 // This allows us to control when the debounced function executes in tests
+// The real useDebouncer returns a stable reference, so we cache instances by function
+const debouncerCache = new Map<() => void, any>()
+
 jest.mock('@tanstack/react-pacer', () => ({
   useDebouncer: jest.fn((fn, options) => {
+    // Return cached instance if it exists (handles StrictMode double renders)
+    if (debouncerCache.has(fn)) {
+      return debouncerCache.get(fn)
+    }
+
     let timeoutId: NodeJS.Timeout | null = null
     let isPending = false
 
-    return {
+    const instance = {
       maybeExecute: jest.fn(() => {
         if (timeoutId) {
           clearTimeout(timeoutId)
@@ -30,6 +37,7 @@ jest.mock('@tanstack/react-pacer', () => ({
         isPending = true
         timeoutId = setTimeout(() => {
           isPending = false
+          timeoutId = null
           fn()
         }, options.wait)
       }),
@@ -48,6 +56,9 @@ jest.mock('@tanstack/react-pacer', () => ({
         },
       },
     }
+
+    debouncerCache.set(fn, instance)
+    return instance
   }),
 }))
 
@@ -66,6 +77,7 @@ describe('EditProjectForm - README Scenarios', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     jest.clearAllMocks()
+    debouncerCache.clear()
   })
 
   afterEach(() => {

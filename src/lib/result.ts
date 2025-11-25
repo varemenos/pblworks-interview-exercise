@@ -1,3 +1,5 @@
+// though for much more complex webapps I'd use https://github.com/supermacro/neverthrow
+
 export type Result<T, E> = Success<T> | Failure<E>
 
 // types
