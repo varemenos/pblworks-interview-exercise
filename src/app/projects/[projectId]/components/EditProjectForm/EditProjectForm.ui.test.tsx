@@ -7,6 +7,7 @@ import { EditProjectForm } from './EditProjectForm'
 import { updateProject } from '../../actions/update-project'
 import { Project } from '@prisma/client'
 import { success, failure } from '@/lib/result'
+import { HeaderProvider } from '@/components/Header/HeaderContext'
 
 jest.mock('../../actions/update-project')
 
@@ -51,7 +52,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         () => new Promise(() => {}), // Never resolves to keep status as 'saving'
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -72,7 +77,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         success({ project, version: 1 }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       // StatusIcon should not be visible on initial load
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
@@ -85,7 +94,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         success({ project, version: 1 }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -110,7 +123,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -135,7 +152,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -160,7 +181,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i) as HTMLInputElement
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -195,7 +220,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -223,7 +252,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -251,7 +284,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -296,7 +333,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'My Version' } })
@@ -338,7 +379,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'First Edit' } })
@@ -378,7 +423,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
       const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
       const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -397,7 +446,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         success({ project, version: 1 }),
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })
@@ -423,7 +476,11 @@ describe('EditProjectForm - UI & Navigation Guard', () => {
         () => new Promise(() => {}), // Never resolves
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       fireEvent.change(titleInput, { target: { value: 'New Title' } })

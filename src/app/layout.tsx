@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import theme from '@/theme'
 import { CssBaseline, GlobalStyles, Stack } from '@mui/material'
 import Header from '@/components/Header/Header'
+import { HeaderProvider } from '@/components/Header/HeaderContext'
 export const metadata: Metadata = {
   title: 'PBLWorks Author',
 }
@@ -24,10 +25,12 @@ export default function RootLayout({
                 body: { backgroundColor: '#eaeaea', padding: 10 },
               }}
             />
-            <Stack spacing={2}>
-              <Header />
-              {children}
-            </Stack>
+            <HeaderProvider>
+              <Stack spacing={2}>
+                <Header />
+                {children}
+              </Stack>
+            </HeaderProvider>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

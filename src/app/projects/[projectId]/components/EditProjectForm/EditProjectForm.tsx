@@ -12,6 +12,7 @@ import { Project } from '@prisma/client'
 import { useReducer, useEffect, useRef, useCallback, type Dispatch } from 'react'
 import { useDebouncer } from '@tanstack/react-pacer'
 import { useNavigationGuard } from '@/lib/hooks/useNavigationGuard'
+import { useSyncHeaderTitle } from '@/components/Header/useSyncHeaderTitle'
 import { StatusIcon } from './StatusIcon'
 import { ConflictBanner } from './ConflictBanner'
 
@@ -70,6 +71,9 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
   // Navigation guard: warn user before closing the browser tab (if they have unsaved changes)
   useNavigationGuard(state.dirty === true || state.status === 'saving')
 
+  // Sync project title to header context whenever it changes
+  useSyncHeaderTitle(state.project.title)
+
   // When the user makes a change to a field, we need to update the state and trigger a save
   // We use the debouncer to ensure that multiple rapid changes are debounced together into a single save
   const handleFieldChange = (field: 'title' | 'subhead' | 'description', value: string) => {
@@ -86,7 +90,6 @@ export const EditProjectForm = ({ project }: { project: Project }) => {
 
   return (
     <Paper sx={{ padding: 2, position: 'relative' }}>
-      <Typography variant="h2">{state.project.title || 'Untitled Project'}</Typography>
       <Grid container spacing={2} sx={{ mb: 2, mt: 2 }}>
         <Grid item xs={12} md={5} lg={4}>
           <TextField

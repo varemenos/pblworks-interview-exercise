@@ -11,6 +11,14 @@ import { EditProjectForm } from './EditProjectForm'
 import { updateProject } from '../../actions/update-project'
 import { Project } from '@prisma/client'
 import { success } from '@/lib/result'
+import { HeaderProvider } from '@/components/Header/HeaderContext'
+import Header from '@/components/Header/Header'
+import { usePathname, useRouter } from 'next/navigation'
+
+jest.mock('next/navigation', () => ({
+  usePathname: jest.fn(),
+  useRouter: jest.fn(),
+}))
 
 jest.mock('../../actions/update-project')
 
@@ -99,7 +107,11 @@ describe('EditProjectForm - README Scenarios', () => {
 
       mockUpdateProject.mockReturnValueOnce(firstSavePromise)
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
 
@@ -164,7 +176,11 @@ describe('EditProjectForm - README Scenarios', () => {
         })
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
       const titleInput = screen.getByLabelText(/project title/i)
       const subheadInput = screen.getByLabelText(/project subhead/i)
@@ -203,6 +219,16 @@ describe('EditProjectForm - README Scenarios', () => {
   })
 
   describe('Scenario 3: UI updates immediately', () => {
+    const mockUsePathname = usePathname as jest.MockedFunction<typeof usePathname>
+    const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+
+    beforeEach(() => {
+      mockUsePathname.mockReturnValue('/projects/123')
+      mockUseRouter.mockReturnValue({
+        push: jest.fn(),
+      } as any)
+    })
+
     it('should update the displayed title immediately as user types, before save completes', async () => {
       const project = createProject({ title: 'Original Title' })
       const updatedProject = createProject({
@@ -219,10 +245,15 @@ describe('EditProjectForm - README Scenarios', () => {
 
       mockUpdateProject.mockReturnValueOnce(savePromise as any)
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <Header />
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
-      // Check initial title
-      const titleHeading = screen.getByRole('heading', { level: 2 })
+      // Check initial title in header
+      const titleHeading = screen.getByRole('heading', { level: 1 })
       expect(titleHeading).toHaveTextContent('Original Title')
 
       const titleInput = screen.getByLabelText(/project title/i)
@@ -276,9 +307,14 @@ describe('EditProjectForm - README Scenarios', () => {
         })
       )
 
-      render(<EditProjectForm project={project} />)
+      render(
+        <HeaderProvider>
+          <Header />
+          <EditProjectForm project={project} />
+        </HeaderProvider>
+      )
 
-      const titleHeading = screen.getByRole('heading', { level: 2 })
+      const titleHeading = screen.getByRole('heading', { level: 1 })
       const titleInput = screen.getByLabelText(/project title/i)
 
       // Make rapid changes

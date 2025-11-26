@@ -8,7 +8,7 @@ const Logo = () => {
     <Box
       component={Link}
       href="/projects"
-      sx={{ width: 200, position: 'relative', alignSelf: 'stretch', cursor: 'pointer' }}
+      sx={{ width: 200, height: 40, position: 'relative', cursor: 'pointer' }}
     >
       <Image src="/design-logo.svg" alt="PBLWorks Design logo" fill />
     </Box>
