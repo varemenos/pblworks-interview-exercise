@@ -15,4 +15,5 @@ model Project {
   title       String @default("")
   subhead     String @default("")
   description String @default("")
+  version     Int    @default(1)
 }

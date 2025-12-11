@@ -10,6 +10,8 @@ export default async function Page({
   params: { projectId: string }
 }) {
   const id = parseInt(params.projectId)
+  // for some reason the server would crash once in a while when trying to access a file called installHook.js.map, seems to be related to the React devtools somehow.
+  if (!Number.isInteger(id)) return notFound()
 
   const project = await prisma.project.findUnique({
     where: { id },
